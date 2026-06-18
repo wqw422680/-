@@ -117,6 +117,33 @@
       display:none;
     }
     .intro-sound.show{display:inline-flex}
+    .intro-actions{
+      position:absolute;
+      left:50%;
+      bottom:8%;
+      z-index:3;
+      transform:translateX(-50%);
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:12px;
+      padding:0 18px;
+      width:min(100%,520px);
+    }
+    .intro-actions .intro-sound{
+      position:static;
+      transform:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:50px;
+      white-space:nowrap;
+    }
+    .intro-skip{
+      border-color:rgba(148,163,184,.32);
+      background:rgba(2,5,9,.46);
+      color:#cbd5e1;
+    }
     .intro-screen:after{
       content:"";
       position:absolute;
@@ -1161,10 +1188,13 @@
     </svg>
   </div>
   <div class="intro-screen" id="introScreen" aria-label="Opening video">
-    <video id="introVideo" autoplay playsinline preload="auto">
+    <video id="introVideo" autoplay muted playsinline preload="auto">
       <source src="/assets/site-intro-opening-BoSmnocl.mp4?v=96396" type="video/mp4">
     </video>
-    <button class="intro-sound" id="introSoundButton" type="button">点击开启声音</button>
+    <div class="intro-actions">
+      <button class="intro-sound show" id="introSoundButton" type="button">点击开启声音</button>
+      <button class="intro-sound intro-skip" id="introSkipButton" type="button">跳过开场</button>
+    </div>
   </div>
   <main class="page">
     <div class="global-aura"></div>
@@ -1422,6 +1452,7 @@
     const introScreen = document.getElementById("introScreen");
     const introVideo = document.getElementById("introVideo");
     const introSoundButton = document.getElementById("introSoundButton");
+    const introSkipButton = document.getElementById("introSkipButton");
     function wakeBackgroundVideos(){
       document.querySelectorAll("video").forEach(video => {
         if(video === introVideo) return;
@@ -1451,12 +1482,15 @@
       });
     }
     if(introVideo){
-      introVideo.muted = false;
+      introVideo.muted = true;
       introVideo.volume = 1;
       introVideo.addEventListener("ended", finishIntro);
       introVideo.addEventListener("error", finishIntro);
       if(introSoundButton) introSoundButton.addEventListener("click", playIntroWithSound);
-      playIntroWithSound();
+      if(introSkipButton) introSkipButton.addEventListener("click", finishIntro);
+      introVideo.play().catch(() => {
+        if(introSoundButton) introSoundButton.classList.add("show");
+      });
     }
     window.addEventListener("load", wakeBackgroundVideos);
     document.addEventListener("visibilitychange", () => {
